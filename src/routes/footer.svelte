@@ -7,8 +7,8 @@
     ] 
 </script>
 
-<footer class="bg-zinc-800 flex flex-row m-5">
-    <div class="container mx-auto flex justify-center items-center">
+<footer class="bg-zinc-800 flex flex-row w-full ">
+    <div class="container bg-zinc-800 flex justify-center items-center mb-5 ">
         <ul class="flex space-x-4">
             {#each socials as social}
                 <li>
