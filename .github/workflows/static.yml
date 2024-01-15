@@ -1,40 +1,47 @@
-name: Deploy SvelteKit to GitHub Pages
+name: Deploy to GitHub Pages
+on:  
+    push:    
+        branches: 'master'
+jobs:  
+    build_site:    
+        runs-on: 
+            ubuntu-latest    
+        steps:      
+            - name: Checkout        
+            uses: actions/checkout@v3
 
-on:
-  push:
-    branches:
-      - main
-      
-jobs:
-  build:
-    runs-on: ubuntu-latest
+            - name: Install Node.js        
+            uses: actions/setup-node@v3        
+            with:          
+                node-version: 18          
+                cache: npm
 
-    steps:
-      - name: Checkout repository
-        uses: actions/checkout@v2
+            - name: Install dependencies        
+            run: npm install
 
-      - name: Setup Node.js
-        uses: actions/setup-node@v3
-        with:
-          node-version: '14'
+            - name: build        
+            env:          
+                BASE_PATH: '/${{ github.event.repository.name }}'        
+            run: |          
+                npm run build
 
-      - name: Install dependencies
-        run: npm install
+            - name: Upload Artifacts        
+            uses: actions/upload-pages-artifact@v2        
+            with:          
+                path: 'build/'
+    deploy:    
+        needs: build_site    
+        runs-on: ubuntu-latest
 
-      - name: Build SvelteKit
-        run: npm run build
+        permissions:      
+            pages: write      
+            id-token: write
 
-  deploy:
-    runs-on: ubuntu-latest
+        environment:      
+            name: github-pages      
+            url: ${{ steps.deployment.outputs.page_url }}
 
-    needs: build
-
-    steps:
-      - name: Checkout repository
-        uses: actions/checkout@v2
-
-      - name: Deploy to GitHub Pages
-        uses: peaceiris/actions-gh-pages@v3
-        with:
-          github_token: ${{ secrets.GITHUB_TOKEN }}
-          publish_dir: ./build
+        steps:      
+            - name: Deploy        
+            id: deployment        
+            uses: actions/deploy-pages@v2
