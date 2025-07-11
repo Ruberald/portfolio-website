@@ -5,25 +5,25 @@ on:
     branches:
       - master              # publish whenever “master” is updated
 
-      # Pages‑specific permissions must be available to the deploy job
-    permissions:
-      contents: read
-    pages: write
-    id-token: write          # needed for OIDC‑based deployment
+# Pages‑specific permissions must be available to the deploy job
+permissions:
+  contents: read
+  pages: write
+  id-token: write          # needed for OIDC‑based deployment
 
-    jobs:
-      build_site:
-        runs-on: ubuntu-latest
+jobs:
+  build_site:
+    runs-on: ubuntu-latest
 
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4       # ↗ current major :contentReference[oaicite:0]{index=0}
 
-        # Uncomment if you prefer pnpm
-        # - name: Install pnpm
-        #   uses: pnpm/action-setup@v2
-        #   with:
-        #     version: 8
+      # Uncomment if you prefer pnpm
+      # - name: Install pnpm
+      #   uses: pnpm/action-setup@v2
+      #   with:
+      #     version: 8
 
       - name: Setup Node.js
         uses: actions/setup-node@v4      # ↗ current major :contentReference[oaicite:1]{index=1}
@@ -31,7 +31,7 @@ on:
           node-version: 18              # keep LTS, change if you need 20+
           cache: npm
 
-          # Optional but recommended: enables Pages metadata and future‑proofs build
+      # Optional but recommended: enables Pages metadata and future‑proofs build
       - name: Configure Pages
         id: pages
         uses: actions/configure-pages@v5    # :contentReference[oaicite:2]{index=2}
@@ -49,14 +49,14 @@ on:
         with:
           path: build/
 
-        deploy:
-          needs: build_site
-        runs-on: ubuntu-latest
-        environment:
-          name: github-pages
-        url: ${{ steps.deployment.outputs.page_url }}
+  deploy:
+    needs: build_site
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
 
-        steps:
-          - name: Deploy to GitHub Pages
+    steps:
+      - name: Deploy to GitHub Pages
         id: deployment
         uses: actions/deploy-pages@v4            # ↗ required new major :contentReference[oaicite:4]{index=4}
