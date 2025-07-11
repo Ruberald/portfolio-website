@@ -2,55 +2,61 @@ name: Deploy to GitHub Pages
 
 on:
   push:
-    branches: 'master'
+    branches:
+      - master              # publish whenever “master” is updated
 
-jobs:
-  build_site:
-    runs-on: ubuntu-latest
+      # Pages‑specific permissions must be available to the deploy job
+    permissions:
+      contents: read
+    pages: write
+    id-token: write          # needed for OIDC‑based deployment
+
+    jobs:
+      build_site:
+        runs-on: ubuntu-latest
+
     steps:
-      - name: Checkout
-        uses: actions/checkout@v3
+      - name: Checkout repository
+        uses: actions/checkout@v4       # ↗ current major :contentReference[oaicite:0]{index=0}
 
-      # If you're using pnpm, add this step then change the commands and cache key below to use `pnpm`
-      # - name: Install pnpm
-      #   uses: pnpm/action-setup@v2
-      #   with:
-      #     version: 8
+        # Uncomment if you prefer pnpm
+        # - name: Install pnpm
+        #   uses: pnpm/action-setup@v2
+        #   with:
+        #     version: 8
 
-      - name: Install Node.js
-        uses: actions/setup-node@v3
+      - name: Setup Node.js
+        uses: actions/setup-node@v4      # ↗ current major :contentReference[oaicite:1]{index=1}
         with:
-          node-version: 18
+          node-version: 18              # keep LTS, change if you need 20+
           cache: npm
 
+          # Optional but recommended: enables Pages metadata and future‑proofs build
+      - name: Configure Pages
+        id: pages
+        uses: actions/configure-pages@v5    # :contentReference[oaicite:2]{index=2}
+
       - name: Install dependencies
-        run: npm install
+        run: npm ci
 
-      - name: build
+      - name: Build static site
         env:
-          BASE_PATH: '/${{ github.event.repository.name }}'
-        run: |
-          npm run build
+          BASE_PATH: "/${{ github.event.repository.name }}"
+        run: npm run build
 
-      - name: Upload Artifacts
-        uses: actions/upload-pages-artifact@v2
+      - name: Upload Pages artifact
+        uses: actions/upload-pages-artifact@v3   # ↗ required new major :contentReference[oaicite:3]{index=3}
         with:
-          # this should match the `pages` option in your adapter-static options
-          path: 'build/'
+          path: build/
 
-  deploy:
-    needs: build_site
-    runs-on: ubuntu-latest
+        deploy:
+          needs: build_site
+        runs-on: ubuntu-latest
+        environment:
+          name: github-pages
+        url: ${{ steps.deployment.outputs.page_url }}
 
-    permissions:
-      pages: write
-      id-token: write
-
-    environment:
-      name: github-pages
-      url: ${{ steps.deployment.outputs.page_url }}
-
-    steps:
-      - name: Deploy
+        steps:
+          - name: Deploy to GitHub Pages
         id: deployment
-        uses: actions/deploy-pages@v2
+        uses: actions/deploy-pages@v4            # ↗ required new major :contentReference[oaicite:4]{index=4}
